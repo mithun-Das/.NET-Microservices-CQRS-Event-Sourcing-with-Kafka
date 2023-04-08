@@ -2,6 +2,7 @@
 using CQRS.Core.Domain;
 using CQRS.Core.Messages;
 using Post.Common.Events;
+using System.ComponentModel.Design;
 
 namespace Post.Cmd.Domain.Aggregates
 {
@@ -110,6 +111,83 @@ namespace Post.Cmd.Domain.Aggregates
         {
             _id = @event.Id;
             _comments.Add(@event.CommentId, new Tuple<string, string>(@event.Comment, @event.Username));
+        }
+
+        public void EditComment(Guid CommentId, string comment, string username)
+        {
+            if (!_active)
+            {
+                throw new InvalidOperationException("You can't edit comment of an inactive post!!!");
+            }
+
+            if (!_comments[CommentId].Item2.Equals(username, StringComparison.CurrentCultureIgnoreCase))
+            {
+                throw new InvalidOperationException($"You are not allowed to edit a comment that was made by another user!");
+            }
+
+            RaiseEvent(new CommentUpdatedEvent
+            {
+                Id = _id,
+                CommentId = CommentId,
+                Comment = comment,
+                Username = username,
+                EditDate = DateTime.Now
+            });
+        }
+
+        public void Apply(CommentUpdatedEvent @event)
+        {
+            _id = @event.Id;
+            _comments[@event.CommentId] = new Tuple<string, string>(@event.Comment, @event.Username);
+        }
+
+        public void RemoveComment(Guid commentId, string username)
+        {
+            if (!_active)
+            {
+                throw new InvalidOperationException("You can't remove comment of an inactive post!!!");
+            }
+
+            if (!_comments[commentId].Item2.Equals(username, StringComparison.CurrentCultureIgnoreCase))
+            {
+                throw new InvalidOperationException($"You are not allowed to remove a comment that was made by another user!");
+            }
+
+            RaiseEvent(new CommentRemovedEvent
+            {
+                Id = _id,
+                CommentId = commentId
+            });
+        }
+
+        public void Apply(CommentRemovedEvent @event)
+        {
+            _id = @event.Id;
+            _comments.Remove(@event.CommentId);
+        }
+
+        public void DeletePost(string username)
+        {
+            if (!_active)
+            {
+                throw new InvalidOperationException("The post has already been removed!!!");
+            }
+
+            if (!_author.Equals(username, StringComparison.CurrentCultureIgnoreCase))
+            {
+                throw new InvalidOperationException("You are not allowed to delete a post that was made by somebody else!!!");
+            }
+
+            RaiseEvent(new PostRemovedEvent
+            {
+                Id = _id,
+            });
+        }
+
+        public void Apply(PostRemovedEvent @event)
+        {
+            _id = @event.Id;
+            _active = false;
         }
     }
 }
