@@ -24,7 +24,7 @@ namespace Post.Cmd.Api.Controllers
         [HttpPost]
         public async Task<ActionResult> NewPostAsync(NewPostCommand command)
         {
-            var id = new Guid();
+            var id = Guid.NewGuid();
 
             try
             {
@@ -34,6 +34,7 @@ namespace Post.Cmd.Api.Controllers
 
                 return StatusCode(StatusCodes.Status201Created, new NewPostResponse
                 {
+                    Id = id,
                     Message = "New post creation request completed successfully"!
                 });
             }
