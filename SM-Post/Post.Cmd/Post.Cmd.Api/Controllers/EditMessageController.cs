@@ -2,7 +2,6 @@
 using CQRS.Core.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Post.Cmd.Api.Commands;
-using Post.Cmd.Api.DTOs;
 using Post.Common.DTOs;
 
 namespace Post.Cmd.Api.Controllers
@@ -11,10 +10,10 @@ namespace Post.Cmd.Api.Controllers
     [Route("api/v1/[controller]")]
     public class EditMessageController : ControllerBase
     {
-        private readonly ILogger<NewPostController> _logger;
+        private readonly ILogger<EditMessageController> _logger;
         private readonly ICommandDispatcher _commandDispatcher;
 
-        public EditMessageController(ILogger<NewPostController> logger, ICommandDispatcher commandDispatcher)
+        public EditMessageController(ILogger<EditMessageController> logger, ICommandDispatcher commandDispatcher)
         {
             _logger = logger;
             _commandDispatcher = commandDispatcher;
