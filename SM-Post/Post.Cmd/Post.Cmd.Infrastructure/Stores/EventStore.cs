@@ -60,5 +60,15 @@ namespace Post.Cmd.Infrastructure.Stores
                 await _eventProducer.ProduceAsync(topic, @event);
             }
         }
+
+        public async Task<List<Guid>> GetAggregateIdsAsync()
+        {
+            var eventStream = await _eventStoreRepository.FindAllAsync();
+
+            if(eventStream == null || !eventStream.Any())
+                throw new ArgumentNullException(nameof(eventStream), " Couldn't retrieve event stream from event store!");
+
+            return eventStream.Select(x => x.AggregateIdentifier).Distinct().ToList();
+        }
     }
 }
